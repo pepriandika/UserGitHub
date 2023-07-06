@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">User Git Hub</string>
+    <string name="search">Search</string>
+    <string name="search_hint">Search User</string>
+    <string name="hello_blank_fragment">Hello following fragment</string>
+    <string name="tab_text_1">Following</string>
+    <string name="tab_text_2">Followers</string>
+    <string name="following">following</string>
+    <string name="followers">followers</string>
+    <string name="foto_user">Foto User</string>
+    <string name="userlogin">userlogin</string>
+    <string name="hello_following_fragment">Hello Following Fragment</string>
+    <string name="photo_user">Photo User</string>
+    <string name="pepri_andika_ganteng">Pepri Andika Ganteng</string>
+    <string name="detail_user">Detail</string>
+</resources>

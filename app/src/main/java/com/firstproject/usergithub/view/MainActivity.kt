@@ -9,6 +9,7 @@ import android.util.Log
 import android.view.Menu
 import androidx.appcompat.widget.SearchView
 import android.view.View
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.firstproject.usergithub.network.ApiConfig
@@ -17,13 +18,14 @@ import com.firstproject.usergithub.adapter.UserAdapter
 import com.firstproject.usergithub.databinding.ActivityMainBinding
 import com.firstproject.usergithub.model.UserList
 import com.firstproject.usergithub.model.UserResponse
+import com.firstproject.usergithub.viewmodel.MainViewModel
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
 
 class MainActivity : AppCompatActivity() {
-
+    private lateinit var viewModel: MainViewModel
     private lateinit var binding: ActivityMainBinding
 
     companion object {
@@ -35,40 +37,50 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        viewModel = ViewModelProvider(this)[MainViewModel::class.java]
+
         val layoutManager = LinearLayoutManager(this)
         binding.rvUserList.layoutManager = layoutManager
         val itemDecoration = DividerItemDecoration(this, layoutManager.orientation)
         binding.rvUserList.addItemDecoration(itemDecoration)
 
-        listUser()
+        viewModel.loadingVisibility.observe(this) { visibility ->
+            binding.progressBar.visibility = visibility
+        }
+
+        viewModel.userData.observe(this) { userList ->
+            setUserData(userList)
+        }
+
+        viewModel.fetchUserData()
     }
 
-    private fun listUser() {
-        showLoading(true)
-        val client = ApiConfig.getApiService().getUser("a")
-        client.enqueue(object : Callback<UserList> {
-            override fun onResponse(
-                call: Call<UserList>,
-                response: Response<UserList>
-            ) {
-                showLoading(false)
-                if (response.isSuccessful) {
-                    val responseBody = response.body()
-                    if (responseBody != null) {
-                        setUserData(responseBody.items)
-                    }
-                } else {
-                    Log.e(TAG, "onFailure: ${response.message()}")
-                }
-            }
-
-            override fun onFailure(call: Call<UserList>, t: Throwable) {
-                showLoading(false)
-                Log.e(TAG, "onFailure: ${t.message}")
-            }
-
-        })
-    }
+//    private fun listUser() {
+//        showLoading(true)
+//        val client = ApiConfig.getApiService().getUser("a")
+//        client.enqueue(object : Callback<UserList> {
+//            override fun onResponse(
+//                call: Call<UserList>,
+//                response: Response<UserList>
+//            ) {
+//                showLoading(false)
+//                if (response.isSuccessful) {
+//                    val responseBody = response.body()
+//                    if (responseBody != null) {
+//                        setUserData(responseBody.items)
+//                    }
+//                } else {
+//                    Log.e(TAG, "onFailure: ${response.message()}")
+//                }
+//            }
+//
+//            override fun onFailure(call: Call<UserList>, t: Throwable) {
+//                showLoading(false)
+//                Log.e(TAG, "onFailure: ${t.message}")
+//            }
+//
+//        })
+//    }
 
     private fun setUserData(userResponse: List<UserResponse>) {
         val userList = ArrayList<UserResponse>()

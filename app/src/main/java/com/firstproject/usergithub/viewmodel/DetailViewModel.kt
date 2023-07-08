@@ -1,6 +1,5 @@
 package com.firstproject.usergithub.viewmodel
 
-
 import android.view.View
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -12,35 +11,35 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class MainViewModel: ViewModel() {
-    private val _userData = MutableLiveData<List<UserResponse>>()
-    private val _loadingVisibility = MutableLiveData<Int>()
+class DetailViewModel: ViewModel() {
+    private val _userDetail = MutableLiveData<UserResponse>()
+    val userDetail: LiveData<UserResponse> get() = _userDetail
 
-    val userData: LiveData<List<UserResponse>> get() = _userData
+    private val _loadingVisibility = MutableLiveData<Int>()
     val loadingVisibility: LiveData<Int> get() = _loadingVisibility
 
     var isDataFetched = false
 
-    fun fetchUserData(query: String) {
+    fun fetchUserDetail(userName: String) {
         if (!isDataFetched) {
             showLoading(true)
-            val client = ApiConfig.getApiService().getUser(query)
-            client.enqueue(object : Callback<UserList> {
+            val client = ApiConfig.getApiService().getDetailUser(userName)
+            client.enqueue(object : Callback<UserResponse> {
                 override fun onResponse(
-                    call: Call<UserList>,
-                    response: Response<UserList>
+                    call: Call<UserResponse>,
+                    response: Response<UserResponse>
                 ) {
                     showLoading(false)
                     if (response.isSuccessful) {
                         val responseBody = response.body()
                         if (responseBody != null) {
-                            _userData.value = responseBody.items
+                            _userDetail.value = responseBody
                             isDataFetched = true
                         }
                     }
                 }
 
-                override fun onFailure(call: Call<UserList>, t: Throwable) {
+                override fun onFailure(call: Call<UserResponse>, t: Throwable) {
                     showLoading(false)
                 }
             })

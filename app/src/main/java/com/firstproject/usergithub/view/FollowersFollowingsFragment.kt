@@ -5,22 +5,19 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.isVisible
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.firstproject.usergithub.network.ApiConfig
 import com.firstproject.usergithub.adapter.UserAdapter
 import com.firstproject.usergithub.databinding.FragmentFollowersBinding
-import com.firstproject.usergithub.model.UserResponse
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import com.firstproject.usergithub.viewmodel.FollowersFollowingViewModel
 
 class FollowersFollowingsFragment : Fragment() {
     private lateinit var login: String
     private var position: Int = 0
 
     private lateinit var binding: FragmentFollowersBinding
+    private val viewModel: FollowersFollowingViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -41,53 +38,20 @@ class FollowersFollowingsFragment : Fragment() {
         arguments?.let {
             login = it.getString("login").toString()
             position = it.getInt("login position")
-            userList(login, position)
         }
-    }
 
-    private fun userList(login:String, pos: Int) {
-        showLoading(true)
-        val client = if (pos == 1) ApiConfig.getApiService()
-            .getFollowing(login) else ApiConfig.getApiService().getFollowers(login)
-        client.enqueue(object : Callback<List<UserResponse>> {
-            override fun onResponse(
-                call: Call<List<UserResponse>>,
-                response: Response<List<UserResponse>>
-            ) {
-                showLoading(false)
-                if (response.isSuccessful) {
-                    val responseBody = response.body()
-                    if (responseBody != null) {
-                        setUserData(responseBody)
-                    }
-                }
-            }
+        val userAdapter = UserAdapter()
+        binding.rvUserListFollowers.adapter = userAdapter
 
-            override fun onFailure(call: Call<List<UserResponse>>, t: Throwable) {
-                showLoading(false)
-            }
-
-        })
-    }
-
-    private fun showLoading(isLoading: Boolean) = binding.progressBar.isVisible == isLoading
-
-    private fun setUserData(userResponse: List<UserResponse>) {
-        val userList = ArrayList<UserResponse>()
-        for (i in userResponse) {
-            val user = UserResponse(
-                i.followingUrl,
-                i.login,
-                i.id,
-                i.followersUrl,
-                i.avatarUrl,
-                i.followers,
-                i.following,
-                i.name
-            )
-            userList.add(user)
+        viewModel.userData.observe(viewLifecycleOwner) { userList ->
+            userAdapter.submitList(userList)
         }
-        val adapter = UserAdapter(userList)
-        binding.rvUserListFollowers.adapter = adapter
+
+        viewModel.loadingVisibility.observe(viewLifecycleOwner) { visibility ->
+            binding.progressBar.visibility = visibility
+        }
+
+        viewModel.fetchUserData(login, position)
     }
+
 }

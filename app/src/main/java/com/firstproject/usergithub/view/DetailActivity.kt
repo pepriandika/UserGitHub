@@ -2,22 +2,18 @@ package com.firstproject.usergithub.view
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.View
 import androidx.annotation.StringRes
-import com.firstproject.usergithub.network.ApiConfig
+import androidx.lifecycle.ViewModelProvider
 import com.firstproject.usergithub.R
 import com.firstproject.usergithub.adapter.SectionsPagerAdapter
 import com.firstproject.usergithub.databinding.ActivityDetailBinding
-import com.firstproject.usergithub.model.UserResponse
 import com.firstproject.usergithub.utils.loadImage
+import com.firstproject.usergithub.viewmodel.DetailViewModel
 import com.google.android.material.tabs.TabLayoutMediator
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
 class DetailActivity : AppCompatActivity() {
-
     private lateinit var binding: ActivityDetailBinding
+    private lateinit var viewModel: DetailViewModel
 
     private lateinit var userName: String
     private var userId: Int = 0
@@ -27,12 +23,14 @@ class DetailActivity : AppCompatActivity() {
         binding = ActivityDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        supportActionBar?.hide()
+
+        viewModel = ViewModelProvider(this)[DetailViewModel::class.java]
+
         userName = intent.getStringExtra("userName").toString()
         userId = intent.getIntExtra("userId",0)
 
         binding.imgItemPhoto.loadImage("https://avatars.githubusercontent.com/u/${userId}")
-
-        this.fetchUserDetail()
 
         val sectionsPagerAdapter = SectionsPagerAdapter(this, userName)
         binding.viewPager.adapter = sectionsPagerAdapter
@@ -41,43 +39,24 @@ class DetailActivity : AppCompatActivity() {
             tab.text = resources.getString(TAB_TITLES[position])
         }.attach()
 
-    }
+        viewModel.fetchUserDetail(userName)
 
-    private fun showLoading(isLoading: Boolean) {
-        binding.progressBar2.visibility = if (isLoading) View.VISIBLE else View.GONE
-    }
+        viewModel.loadingVisibility.observe(this) { visibility ->
+            binding.progressBar2.visibility = visibility
+        }
 
-    private fun fetchUserDetail() {
-        showLoading(true)
-        val client = ApiConfig.getApiService().getDetailUser(userName)
-        client.enqueue(object : Callback<UserResponse> {
-            override fun onResponse(
-                call: Call<UserResponse>,
-                response: Response<UserResponse>
-            ) {
-                showLoading(false)
-                if (response.isSuccessful) {
-                    val responseBody = response.body()
-                    if (responseBody != null) {
-                        binding.follower.text = buildString {
+        viewModel.userDetail.observe(this) { userDetail ->
+            binding.follower.text = buildString {
                             append("Followers :")
-                            append(responseBody.followers)
+                            append(userDetail.followers)
                         }
                         binding.following.text = buildString {
                             append("Following :")
-                            append(responseBody.following)
+                            append(userDetail.following)
                         }
-                        binding.login.text = responseBody.login
-                        binding.tvItemName2.text = responseBody.name
-
-                    }
-                }
-            }
-
-            override fun onFailure(call: Call<UserResponse>, t: Throwable) {
-                showLoading(false)
-            }
-        })
+            binding.login.text = userDetail.login
+            binding.tvItemName2.text = userDetail.name
+        }
     }
 
     companion object {

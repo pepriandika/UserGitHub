@@ -14,13 +14,13 @@
         android:theme="@style/Theme.UserGitHub"
         tools:targetApi="31">
         <activity
+            android:name=".view.SettingActivity"
+            android:exported="false" />
+        <activity
             android:name=".view.DetailActivity"
             android:exported="false" />
         <activity
             android:name=".view.FollowersFollowingsFragment"
-            android:exported="false" />
-        <activity
-            android:name=".FollowingFragment"
             android:exported="false" />
         <activity
             android:name=".view.MainActivity"

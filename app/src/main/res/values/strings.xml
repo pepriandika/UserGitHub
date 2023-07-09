@@ -14,4 +14,6 @@
     <string name="pepri_andika_ganteng">Pepri Andika Ganteng</string>
     <string name="detail_user">Detail</string>
     <string name="aa">tab layout</string>
+    <string name="setting">Setting</string>
+    <string name="dark_mode">Dark Mode  </string>
 </resources>

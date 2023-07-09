@@ -3,9 +3,11 @@ package com.firstproject.usergithub.view
 
 import android.app.SearchManager
 import android.content.Context
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
+import android.view.MenuItem
 import androidx.appcompat.widget.SearchView
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -15,6 +17,7 @@ import com.firstproject.usergithub.adapter.UserAdapter
 import com.firstproject.usergithub.databinding.ActivityMainBinding
 import com.firstproject.usergithub.viewmodel.MainViewModel
 
+@Suppress("DEPRECATION")
 class MainActivity : AppCompatActivity() {
     private lateinit var viewModel: MainViewModel
     private lateinit var binding: ActivityMainBinding
@@ -76,6 +79,17 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.setting -> {
+                val intent = Intent(this, SettingActivity::class.java)
+                startActivity(intent)
+                overridePendingTransition(0, 0)
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
 }
 
 
